@@ -1,11 +1,14 @@
 const express = require("express");
 const axios = require("axios");
 const dotenv = require("dotenv");
+const morgan = require("morgan");
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+app.use(morgan("tiny"));
 
 app.get("/payment-intents", async (req, res) => {
   const authorization = req.headers["authorization"];
@@ -13,6 +16,7 @@ app.get("/payment-intents", async (req, res) => {
   if (!authorization) {
     throw new Error("Missing STRIPE_SECRET_KEY in environment variables.");
   }
+
   try {
     let hasMore = true;
     let startingAfter: string | undefined;
@@ -48,6 +52,8 @@ app.get("/payment-intents", async (req, res) => {
         startingAfter = data[data.length - 1].id;
       }
     }
+
+    // console.log(allPaymentIntents.length);
 
     res.json(allPaymentIntents);
   } catch (error: any) {
